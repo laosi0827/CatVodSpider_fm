@@ -4,9 +4,8 @@ import android.content.Context;
 
 import com.github.catvod.bean.Result;
 import com.github.catvod.bean.Vod;
-import com.github.catvod.crawler.Spider;
 import com.github.catvod.net.OkHttp;
-import com.github.catvod.utils.Misc;
+import com.github.catvod.utils.Utils;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,17 +20,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Zhaozy extends Spider {
+public class Zhaozy extends Ali {
 
     private final Pattern regexAli = Pattern.compile("(https://www.aliyundrive.com/s/[^\"]+)");
     private final Pattern regexVid = Pattern.compile("(\\S+)");
     private final String siteUrl = "https://zhaoziyuan.la/";
-    private String username = "nikalo8893@bitvoo.com";
-    private String password = "P@ssw0rd";
+    private String username;
+    private String password;
 
     private Map<String, String> getHeader() {
         Map<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", Misc.CHROME);
+        headers.put("User-Agent", Utils.CHROME);
         headers.put("Referer", siteUrl);
         headers.put("Cookie", getCookie());
         return headers;
@@ -42,7 +41,7 @@ public class Zhaozy extends Spider {
         params.put("username", username);
         params.put("password", password);
         Map<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", Misc.CHROME);
+        headers.put("User-Agent", Utils.CHROME);
         headers.put("Referer", siteUrl + "login.html");
         headers.put("Origin", siteUrl);
         Map<String, List<String>> resp = new HashMap<>();
@@ -55,24 +54,17 @@ public class Zhaozy extends Spider {
     @Override
     public void init(Context context, String extend) {
         String[] split = extend.split("\\$\\$\\$");
-        Ali.get().init(split[0]);
-        if (split.length > 2) {
-            username = split[1];
-            password = split[2];
-        }
+        super.init(context, split[0]);
+        username = split[1];
+        password = split[2];
     }
 
     @Override
     public String detailContent(List<String> ids) throws Exception {
-        if (Ali.pattern.matcher(ids.get(0)).find()) return Ali.get().detailContent(ids);
+        if (pattern.matcher(ids.get(0)).find()) return super.detailContent(ids);
         Matcher matcher = regexAli.matcher(OkHttp.string(siteUrl + ids.get(0), getHeader()));
-        if (matcher.find()) return Ali.get().detailContent(Arrays.asList(matcher.group(1)));
+        if (matcher.find()) return super.detailContent(Arrays.asList(matcher.group(1)));
         return "";
-    }
-
-    @Override
-    public String playerContent(String flag, String id, List<String> vipFlags) throws Exception {
-        return Ali.get().playerContent(flag, id);
     }
 
     @Override
